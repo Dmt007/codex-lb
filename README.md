@@ -55,6 +55,14 @@ nix run github:Soju06/codex-lb
 
 Open [localhost:2455](http://localhost:2455) → Add account → Done.
 
+On Windows, after cloning this repository, install the reusable desktop controller:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File ".\scripts\windows\codex-lb-control\install.ps1"
+```
+
+It creates a Desktop shortcut with Start/Stop buttons. See the [Windows desktop controller guide](https://soju06.github.io/codex-lb/deployment/windows-desktop-controller/).
+
 Accessing the dashboard remotely for the first time? You need a one-time bootstrap token —
 see [Getting started](https://soju06.github.io/codex-lb/getting-started/).
 

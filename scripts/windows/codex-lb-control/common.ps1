@@ -89,6 +89,12 @@ function Get-OwnedCodexLbProcess {
         throw "PID $savedPid belongs to '$actualPath', not the managed Codex LB runtime. Refusing to manage it."
     }
 
+    $processInfo = Get-CimInstance Win32_Process -Filter "ProcessId = $savedPid" -ErrorAction Stop
+    $expectedCommand = '"' + $expectedPath + '" -m app.cli --host 127.0.0.1 --port 2455'
+    if ($null -eq $processInfo -or $processInfo.CommandLine.Trim() -ine $expectedCommand) {
+        throw "PID $savedPid is not the managed Codex LB command. Refusing to manage it."
+    }
+
     return $process
 }
 

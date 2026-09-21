@@ -31,7 +31,7 @@ The controller sets `CODEX_LB_DATA_DIR` to `<repo>/.codex-lb`. The existing `.gi
 
 ### Treat process ownership as a safety boundary
 
-The PID file alone is not trusted. The controller launches the installed module directly as `.local/runtime/Scripts/python.exe -m app.cli`, so the captured PID is the long-lived server rather than the short-lived Windows console-script launcher. Status and stop resolve the saved PID and compare the process executable path with that exact runtime Python executable. A missing process becomes stopped; a live mismatched process is refused rather than terminated. Start rejects an occupied dashboard port that is not already the managed process.
+The PID file alone is not trusted. The controller launches the installed module directly as `.local/runtime/Scripts/python.exe -m app.cli` from the ignored controller state directory, so the captured PID is the long-lived server rather than the short-lived Windows console-script launcher. Using a non-repository working directory prevents the source checkout's `app/` package from shadowing the packaged release. Status and stop resolve the saved PID and compare both its executable path and command line with the exact managed invocation. A missing process becomes stopped; a live mismatched process is refused rather than terminated. Start rejects an occupied dashboard port that is not already the managed process. The installer refuses to update the runtime while the managed service is running.
 
 ### Keep network exposure explicit
 

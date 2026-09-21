@@ -15,6 +15,10 @@ if ($null -eq $uv) {
 }
 
 Initialize-CodexLbControllerDirectories -Paths $paths
+$runningProcess = Get-OwnedCodexLbProcess -Paths $paths
+if ($null -ne $runningProcess) {
+    throw "Codex LB is running (PID $($runningProcess.Id)). Stop it before reinstalling the runtime. Account data will be preserved."
+}
 
 if (-not (Test-Path -LiteralPath $paths.PythonExecutable)) {
     & $uv.Source venv $paths.RuntimeRoot --python 3.13

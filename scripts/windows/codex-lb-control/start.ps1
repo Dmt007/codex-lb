@@ -33,7 +33,7 @@ $env:CODEX_LB_DATA_DIR = $paths.DataDirectory
 $process = Start-Process `
     -FilePath $paths.PythonExecutable `
     -ArgumentList @("-m", "app.cli", "--host", "127.0.0.1", "--port", "2455") `
-    -WorkingDirectory $paths.RepoRoot `
+    -WorkingDirectory $paths.StateDirectory `
     -WindowStyle Hidden `
     -RedirectStandardOutput $paths.StdoutLog `
     -RedirectStandardError $paths.StderrLog `

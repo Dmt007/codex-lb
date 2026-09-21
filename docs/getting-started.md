@@ -21,6 +21,14 @@ nix run github:Soju06/codex-lb
 
 Open [localhost:2455](http://localhost:2455) → Add account → Done.
 
+On Windows, a clone can install a reusable desktop controller with Start/Stop buttons:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File ".\scripts\windows\codex-lb-control\install.ps1"
+```
+
+See [Windows desktop controller](deployment/windows-desktop-controller.md) for the clone workflow and data-safety details.
+
 Next: point your coding agent at codex-lb — see [Client Setup](client-setup.md).
 
 ## Remote setup (bootstrap token)

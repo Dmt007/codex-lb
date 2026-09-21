@@ -71,6 +71,7 @@ nav:
       - Docker: deployment/docker.md
       - Kubernetes: deployment/kubernetes.md
       - Remote Access: deployment/remote.md
+      - Windows Desktop Controller: deployment/windows-desktop-controller.md
   - Reference:
       - Settings: reference/settings.md
   - Traffic Parity: traffic-parity.md
