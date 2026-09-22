@@ -1,4 +1,5 @@
 {
+  "modelSources.fields.preferForResponses": "优先使用此来源，再使用本地账号",
   "accounts.actions.disableWarmup": "禁用 Warm-up",
   "accounts.actions.enableWarmup": "启用 Warm-up",
   "accounts.actions.forceProbe": "强制探测",

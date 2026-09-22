@@ -31,6 +31,7 @@ class ModelSourceModelResponse(ModelSourceModelInput):
 
 
 class ModelSourceCreateRequest(DashboardModel):
+    prefer_for_responses: bool = False
     name: str = Field(min_length=1, max_length=128)
     base_url: str = Field(min_length=1, max_length=2048)
     api_key: str | None = Field(default=None, min_length=1)
@@ -44,6 +45,7 @@ class ModelSourceCreateRequest(DashboardModel):
 
 
 class ModelSourceUpdateRequest(DashboardModel):
+    prefer_for_responses: bool | None = None
     name: str | None = Field(default=None, min_length=1, max_length=128)
     base_url: str | None = Field(default=None, min_length=1, max_length=2048)
     api_key: str | None = Field(default=None, min_length=1)
@@ -58,6 +60,7 @@ class ModelSourceUpdateRequest(DashboardModel):
 
 
 class ModelSourceResponse(DashboardModel):
+    prefer_for_responses: bool = False
     id: str
     name: str
     kind: str

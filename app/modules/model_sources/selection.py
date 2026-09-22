@@ -61,6 +61,14 @@ async def select_responses_model_source(
                 continue
             subscription_model = registry_models.get(candidate)
             if assigned_source_ids is None and subscription_model is not None:
+                if only_disabled:
+                    continue
+                source = await repository.find_responses_source_for_model(
+                    candidate,
+                    require_streaming=require_streaming,
+                )
+                if source is not None and source.prefer_for_responses:
+                    break
                 continue
             source = await repository.find_responses_source_for_model(
                 candidate,

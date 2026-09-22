@@ -348,6 +348,7 @@ from app.modules.proxy.source_dispatch import (
     open_with_disconnect_watch,
     settlement_stream,
 )
+from app.modules.proxy.source_fallback import allows_subscription_fallback, is_source_rejection
 from app.modules.proxy.types import (
     CreditStatusDetailsData,
     RateLimitResetCreditsData,
@@ -1182,6 +1183,7 @@ async def responses(
     except ClientPayloadError as exc:
         error = openai_client_payload_error(exc)
         return _logged_error_json_response(request, 400, error)
+    subscription_payload = responses_payload.model_copy(deep=True)
     try:
         source_selection, continuity_suppressed = (
             (None, False)
@@ -1226,7 +1228,7 @@ async def responses(
         if not backend_non_streaming_requested:
             responses_payload.stream = True
         rate_limit_headers = await _rate_limit_headers_for_request(context, api_key)
-        return await _source_responses_response(
+        source_response = await _source_responses_response(
             request,
             responses_payload,
             source=source,
@@ -1236,6 +1238,13 @@ async def responses(
             enforce_openai_sdk_contract=openai_sdk_request,
             native_codex_heartbeat=native_codex_heartbeat,
             context=context,
+            allow_subscription_fallback=allows_subscription_fallback(source, subscription_payload, request.headers),
+        )
+        if source_response is not None:
+            return source_response
+        responses_payload = subscription_payload
+        apply_enforced_service_tier_model_fallback(
+            responses_payload, service_tier_was_enforced=service_tier_was_enforced
         )
 
     if not backend_non_streaming_requested:
@@ -1391,6 +1400,7 @@ async def v1_responses(
     except ClientPayloadError as exc:
         error = openai_client_payload_error(exc)
         return _logged_error_json_response(request, 400, error)
+    subscription_payload = responses_payload.model_copy(deep=True)
     try:
         source_selection, continuity_suppressed = (
             (None, False)
@@ -1433,7 +1443,7 @@ async def v1_responses(
         # source-routed requests use no account, so a closed/empty pool must
         # not reject them.
         rate_limit_headers = await _rate_limit_headers_for_request(context, api_key)
-        return await _source_responses_response(
+        source_response = await _source_responses_response(
             request,
             responses_payload,
             source=source,
@@ -1441,6 +1451,13 @@ async def v1_responses(
             rate_limit_headers=rate_limit_headers,
             pre_normalization_effort=pre_normalization_effort,
             context=context,
+            allow_subscription_fallback=allows_subscription_fallback(source, subscription_payload, request.headers),
+        )
+        if source_response is not None:
+            return source_response
+        responses_payload = subscription_payload
+        apply_enforced_service_tier_model_fallback(
+            responses_payload, service_tier_was_enforced=service_tier_was_enforced
         )
     if responses_payload.stream:
         response = await _stream_responses(
@@ -5125,7 +5142,8 @@ async def _source_responses_response(
     enforce_openai_sdk_contract: bool = True,
     native_codex_heartbeat: bool = False,
     context: ProxyContext | None = None,
-) -> Response:
+    allow_subscription_fallback: bool = False,
+) -> Response | None:
     """Serve a Responses request from an OpenAI-compatible model source.
 
     Every dispatched attempt is owned by one ``SourceDispatch``: the bulkhead
@@ -5147,6 +5165,8 @@ async def _source_responses_response(
     )
     claims = try_claim_source_admission(source)
     if claims is None:
+        if allow_subscription_fallback:
+            return None
         return _logged_error_json_response(
             request,
             503,
@@ -5212,6 +5232,8 @@ async def _source_responses_response(
         return await _finish_non_stream_source_dispatch(request, owner, result, rate_limit_headers=rate_limit_headers)
     except ModelSourceForwardingError as exc:
         await owner.finish_with_forwarding_error(exc)
+        if allow_subscription_fallback and is_source_rejection(exc) and not owner.cleanup_failed:
+            return None
         return _logged_error_json_response(
             request,
             exc.status_code,

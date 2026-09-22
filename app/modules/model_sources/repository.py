@@ -91,7 +91,7 @@ class ModelSourcesRepository:
             .where(ModelSource.supports_responses.is_(True))
             .where(ModelSourceModel.model == model)
             .where(_enablement_filter(only_disabled))
-            .order_by(ModelSource.name, ModelSource.id)
+            .order_by(ModelSource.prefer_for_responses.desc(), ModelSource.name, ModelSource.id)
             .limit(1)
         )
         if require_streaming:

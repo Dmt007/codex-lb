@@ -9,6 +9,7 @@ import { ModelSourceEditDialog } from "./model-source-edit-dialog";
 
 function createModelSource(overrides: Partial<ModelSource> = {}): ModelSource {
   return {
+    preferForResponses: false,
     id: "src_1",
     name: "vllm-local",
     kind: "openai_compatible",

@@ -116,6 +116,21 @@ export function ModelSourcesSettings({ disabled = false }: ModelSourcesSettingsP
                     ))}
                   </div>
                   <div className="truncate text-xs text-muted-foreground">{source.baseUrl}</div>
+                  {source.supportsResponses ? (
+                    <label className="flex items-center gap-2 text-xs">
+                      <Switch
+                        checked={source.preferForResponses}
+                        disabled={busy}
+                        onCheckedChange={(checked) =>
+                          void updateMutation.mutateAsync({
+                            sourceId: source.id,
+                            payload: { preferForResponses: checked },
+                          })
+                        }
+                      />
+                      {t("modelSources.fields.preferForResponses")}
+                    </label>
+                  ) : null}
                   <div className="flex flex-wrap items-center gap-1 pt-1">
                     {source.models.map((model) => (
                       <Badge key={model.id} variant={model.isEnabled ? "outline" : "secondary"}>

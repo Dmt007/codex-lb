@@ -69,6 +69,7 @@ class ModelSourceForwardingError(Exception):
         upstream_status_code: int | None = None,
         retry_after: str | None = None,
         timeout_phase: TimeoutPhase | None = None,
+        before_dispatch: bool = False,
     ) -> None:
         super().__init__(str(payload))
         self.status_code = status_code
@@ -78,6 +79,7 @@ class ModelSourceForwardingError(Exception):
         self.retry_after = retry_after
         # Which bounded phase expired for ``model_source_timeout``/``model_source_idle_timeout``.
         self.timeout_phase = timeout_phase
+        self.before_dispatch = before_dispatch
 
 
 @dataclass(frozen=True, slots=True)
@@ -973,6 +975,7 @@ def _unreachable_error(exc: Exception, *, timeout_phase: TimeoutPhase | None = N
         },
         upstream_status_code=None,
         timeout_phase=timeout_phase,
+        before_dispatch=isinstance(exc, aiohttp.ClientConnectorError),
     )
 
 

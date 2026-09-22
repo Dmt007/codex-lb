@@ -21,6 +21,7 @@ export const ModelSourceModelSchema = z.object({
 });
 
 export const ModelSourceSchema = z.object({
+  preferForResponses: z.boolean().default(false),
   id: z.string(),
   name: z.string(),
   kind: z.string(),
@@ -59,6 +60,7 @@ export const ModelSourceModelInputSchema = z.object({
 });
 
 export const ModelSourceCreateRequestSchema = z.object({
+  preferForResponses: z.boolean().optional(),
   name: z.string().min(1).max(128),
   baseUrl: z.string().min(1).max(2048),
   apiKey: z.string().min(1).nullable().optional(),
@@ -72,6 +74,7 @@ export const ModelSourceCreateRequestSchema = z.object({
 });
 
 export const ModelSourceUpdateRequestSchema = z.object({
+  preferForResponses: z.boolean().optional(),
   name: z.string().min(1).max(128).optional(),
   baseUrl: z.string().min(1).max(2048).optional(),
   apiKey: z.string().min(1).nullable().optional(),

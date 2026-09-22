@@ -52,6 +52,7 @@ class ModelSourcesService:
             kind=MODEL_SOURCE_KIND_OPENAI_COMPATIBLE,
             base_url=_normalize_base_url(payload.base_url),
             api_key_encrypted=_encrypt_optional(self._encryptor, payload.api_key),
+            prefer_for_responses=payload.prefer_for_responses,
             is_enabled=True,
             health_status=MODEL_SOURCE_HEALTH_UNKNOWN,
             supports_chat_completions=payload.supports_chat_completions,
@@ -75,6 +76,8 @@ class ModelSourcesService:
             raise ModelSourceNotFoundError(f"Model source not found: {source_id}")
 
         fields = payload.model_fields_set
+        if "prefer_for_responses" in fields and payload.prefer_for_responses is not None:
+            row.prefer_for_responses = payload.prefer_for_responses
         if "name" in fields and payload.name is not None:
             row.name = _normalize_name(payload.name)
         if "base_url" in fields and payload.base_url is not None:
@@ -218,6 +221,7 @@ def _to_model_response(row: ModelSourceModel) -> ModelSourceModelResponse:
 
 def _to_response(row: ModelSource) -> ModelSourceResponse:
     return ModelSourceResponse(
+        prefer_for_responses=bool(row.prefer_for_responses),
         id=row.id,
         name=row.name,
         kind=row.kind,

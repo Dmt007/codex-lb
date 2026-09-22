@@ -351,6 +351,7 @@ class SourceDispatch:
     # (streams expose it through the usage holder).
     source_response_id: str | None = None
     settlement_failed: bool = False
+    cleanup_failed: bool = False
     _source_closed: bool = field(default=False, init=False, repr=False)
     _reservation_done: bool = field(default=False, init=False, repr=False)
     _claims_released: bool = field(default=False, init=False, repr=False)
@@ -395,6 +396,7 @@ class SourceDispatch:
         try:
             await _await_cleanup_deferring_cancellation(stream.aclose(), scheduler=self.scheduler)
         except Exception:
+            self.cleanup_failed = True
             logger.warning(
                 "model_source_dispatch_close_failed request_id=%s source_id=%s",
                 self.request_id,
@@ -491,6 +493,7 @@ class SourceDispatch:
     async def _release_reservation_step(self, reservation: ApiKeyUsageReservationData) -> None:
         release = self.release_reservation
         if release is None:
+            self.cleanup_failed = True
             logger.error(
                 "source_dispatch_missing_releaser request_id=%s source_id=%s reservation_id=%s",
                 self.request_id,
@@ -501,6 +504,7 @@ class SourceDispatch:
         try:
             await _await_cleanup_deferring_cancellation(release(reservation), scheduler=self.scheduler)
         except Exception:
+            self.cleanup_failed = True
             logger.warning(
                 "source_dispatch_release_failed request_id=%s source_id=%s",
                 self.request_id,
@@ -521,6 +525,7 @@ class SourceDispatch:
         try:
             self.claims.release()
         except Exception:
+            self.cleanup_failed = True
             logger.warning("source_dispatch_claims_release_failed request_id=%s", self.request_id, exc_info=True)
 
     def record_result(self, status: DispatchStatus) -> None:

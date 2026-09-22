@@ -1,4 +1,5 @@
 {
+  "modelSources.fields.preferForResponses": "로컬 계정보다 이 소스를 먼저 사용",
   "accounts.actions.disableWarmup": "Warm-up 끄기",
   "accounts.actions.enableWarmup": "Warm-up 켜기",
   "accounts.actions.forceProbe": "강제 probe",
