@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from sqlalchemy import ColumnElement, and_, delete, or_, select
+from sqlalchemy import ColumnElement, and_, delete, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -25,6 +25,18 @@ def _enablement_filter(only_disabled: bool) -> ColumnElement[bool]:
 class ModelSourcesRepository:
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
+
+    async def record_health(self, source: ModelSource, health: str) -> None:
+        await self._session.execute(
+            update(ModelSource)
+            .where(
+                ModelSource.id == source.id,
+                ModelSource.base_url == source.base_url,
+                ModelSource.api_key_encrypted == source.api_key_encrypted,
+            )
+            .values(health_status=health)
+        )
+        await self._session.commit()
 
     async def list_sources(self) -> list[ModelSource]:
         result = await self._session.execute(

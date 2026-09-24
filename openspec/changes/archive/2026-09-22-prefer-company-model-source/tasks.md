@@ -1,6 +1,7 @@
 ## 1. Source configuration
 
-- [ ] 1.1 Add false-default persisted Responses preference on the current migration head; verify upgrade/downgrade and migration topology.
+- [x] 1.0 Resolve historical timestamp collision with an exact merge-gated exception; prove new collisions and missing/changed merges still fail.
+- [x] 1.1 Add false-default persisted Responses preference on the current migration head; verify upgrade/downgrade and migration topology.
 - [x] 1.2 Expose preference through source API and existing dashboard source controls; verify API round-trip, secret omission, frontend type checks, and screenshots of off/on states.
 
 ## 2. Routing and fallback
@@ -12,4 +13,4 @@
 ## 3. Verification and documentation
 
 - [x] 3.1 Run relevant backend/frontend checks and strict OpenSpec validation; record actual results and limitations.
-- [ ] 3.2 Sync stable requirements/context and archive only after implementation verification passes.
+- [x] 3.2 Sync stable requirements/context and archive only after implementation verification passes.

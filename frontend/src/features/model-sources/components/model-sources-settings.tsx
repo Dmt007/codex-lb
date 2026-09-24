@@ -1,4 +1,5 @@
 import { Database, Pencil, Plus, Trash2 } from "lucide-react";
+import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
 import { AlertMessage } from "@/components/alert-message";
@@ -29,6 +30,8 @@ function modelPriceLabel(source: ModelSource): string | null {
 
 export type ModelSourcesSettingsProps = {
   disabled?: boolean;
+  compact?: boolean;
+  renderAccountList?: (cards: ReactNode, openCreate: () => void) => ReactNode;
 };
 
 function protocolBadges(source: ModelSource) {
@@ -40,7 +43,7 @@ function protocolBadges(source: ModelSource) {
   ].filter((value): value is string => value !== null);
 }
 
-export function ModelSourcesSettings({ disabled = false }: ModelSourcesSettingsProps) {
+export function ModelSourcesSettings({ disabled = false, compact = false, renderAccountList }: ModelSourcesSettingsProps) {
   const { t } = useTranslation();
   const {
     modelSourcesQuery,
@@ -72,9 +75,8 @@ export function ModelSourcesSettings({ disabled = false }: ModelSourcesSettingsP
     await updateMutation.mutateAsync({ sourceId, payload });
   };
 
-  return (
-    <section className="space-y-4 rounded-xl border bg-card p-5">
-      <div className="flex items-center justify-between gap-4">
+  const header = (
+      <div className={`flex gap-4 ${compact ? "flex-col items-start" : "items-center justify-between"}`}>
         <div className="flex items-center gap-2.5">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
             <Database className="h-4 w-4 text-primary" aria-hidden="true" />
@@ -96,16 +98,24 @@ export function ModelSourcesSettings({ disabled = false }: ModelSourcesSettingsP
         </Button>
       </div>
 
-      {error ? <AlertMessage variant="error">{error}</AlertMessage> : null}
+  );
 
+  const cards = <>
+      {error ? <AlertMessage variant="error">{error}</AlertMessage> : null}
       <div className="space-y-2">
         {sources.length > 0 ? (
           sources.map((source) => (
             <div key={source.id} className="rounded-lg border p-3">
               <div className="flex flex-wrap items-start justify-between gap-3">
-                <div className="min-w-0 space-y-1">
+                <div className="min-w-0 flex-1 space-y-1">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-medium">{source.name}</span>
+                    <span className="break-all font-medium">{source.name}</span>
+                    <Badge
+                      variant={source.healthStatus === "inactive" ? "destructive" : "outline"}
+                      title={t("modelSources.health.description")}
+                    >
+                      {t(`modelSources.health.${["active", "inactive"].includes(source.healthStatus) ? source.healthStatus : "unknown"}`)}
+                    </Badge>
                     <Badge variant={source.isEnabled ? "default" : "secondary"}>
 	                      {source.isEnabled ? t("common.states.enabled") : t("common.states.disabled")}
                     </Badge>
@@ -178,13 +188,21 @@ export function ModelSourcesSettings({ disabled = false }: ModelSourcesSettingsP
               </div>
             </div>
           ))
-        ) : (
+        ) : renderAccountList ? null : (
           <div className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
 	            {t("modelSources.empty")}
           </div>
         )}
       </div>
+  </>;
 
+  return (<>
+      {renderAccountList ? renderAccountList(cards, () => createDialog.show()) : (
+        <section className={`min-w-0 space-y-4 rounded-xl border bg-card ${compact ? "p-3 sm:p-4" : "p-5"}`}>
+          {header}
+          {cards}
+        </section>
+      )}
       <ModelSourceCreateDialog
         open={createDialog.open}
         busy={createMutation.isPending}
@@ -211,6 +229,6 @@ export function ModelSourcesSettings({ disabled = false }: ModelSourcesSettingsP
           void deleteMutation.mutateAsync(deleteDialog.data.id).finally(() => deleteDialog.hide());
         }}
       />
-    </section>
+    </>
   );
 }

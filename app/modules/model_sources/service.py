@@ -82,8 +82,10 @@ class ModelSourcesService:
             row.name = _normalize_name(payload.name)
         if "base_url" in fields and payload.base_url is not None:
             row.base_url = _normalize_base_url(payload.base_url)
+            row.health_status = MODEL_SOURCE_HEALTH_UNKNOWN
         if "api_key" in fields:
             row.api_key_encrypted = _encrypt_optional(self._encryptor, payload.api_key)
+            row.health_status = MODEL_SOURCE_HEALTH_UNKNOWN
         if "is_enabled" in fields and payload.is_enabled is not None:
             row.is_enabled = payload.is_enabled
         if "supports_chat_completions" in fields and payload.supports_chat_completions is not None:

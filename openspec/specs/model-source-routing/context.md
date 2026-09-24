@@ -37,3 +37,20 @@ back to local accounts.
 
 The gateway is contacted only for real requests. A successful status alone
 does not demonstrate the remaining balance or semantic correctness of output.
+
+Source administrators can also manage gateways from the Accounts page, in the
+same scrolling list as subscription account cards. Add account > Company gateway opens the same form used by
+Settings; editing, enablement and company-first preference update the same
+record. For example, a company gateway created in Settings appears beside the
+accounts automatically. A gateway is still a model source, so no subscription
+quota or account identity is fabricated for it.
+
+Gateway cards also show the last observed Responses outcome: Active after a
+successful completed request, Inactive after upstream availability/auth/quota
+failure, or Not checked before observation or after credentials/URL change.
+This is independent of the enable switch and does not disable retries. For
+example, an inactive source can recover to Active on its next successful call.
+There is no periodic network probe or balance query; the UI refreshes stored
+observations every 15 seconds while visible. Cancellation, client errors and
+local settlement failures do not count against the upstream. Configuration
+comparison prevents old-credential requests overwriting new health state.

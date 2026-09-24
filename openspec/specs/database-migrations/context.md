@@ -72,3 +72,13 @@ branch. See the [repair context](../../changes/merge-overflow-transport-migratio
 ## Example
 
 Branch A and B each create migration revisions in parallel. After merge, CI detects multiple heads and fails. The resolver adds a merge revision, reruns CI, and proceeds. During deployment, a DB still storing old `013_add_dashboard_settings_routing_strategy` in `alembic_version` is auto-remapped to `20260225_000000_add_dashboard_settings_routing_strategy` before upgrade.
+
+## September 14 historical timestamp collision
+
+The SCIM-token and overflow-removal revisions were already merged with the same
+20260914_000000 timestamp. Renaming either could break a deployed Alembic stamp.
+The preferred-source revision merges these branches; the checker accepts only
+that exact historical pair, original parent and corrective merge. All graph
+and identity checks still run. For example, adding a third revision with that
+timestamp fails even if another merge joins it later. See spec.md for the
+normative compatibility contract.

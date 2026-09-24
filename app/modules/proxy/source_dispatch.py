@@ -93,6 +93,8 @@ from app.modules.model_sources.forwarding import (
     TimeoutPhase,
     classify_responses_frame,
 )
+from app.modules.model_sources.health import observed_health
+from app.modules.model_sources.repository import ModelSourcesRepository
 from app.modules.proxy._service.support import _request_log_client_fields
 from app.modules.proxy.affinity import _owner_lookup_session_id_from_headers
 from app.modules.proxy.source_admission import SourceAdmission
@@ -555,6 +557,13 @@ class SourceDispatch:
         if source_response_id is None and holder is not None and holder.response_id:
             source_response_id = holder.response_id
         _useragent, _useragent_group, conversation_id = _request_log_client_fields(headers)
+        health = observed_health(status, error_code, upstream_status_code)
+        if health is not None and not self.cleanup_failed:
+            try:
+                async with get_background_session() as health_session:
+                    await ModelSourcesRepository(health_session).record_health(self.source, health)
+            except Exception:
+                logger.warning("source health update failed source_id=%s", self.source.id, exc_info=True)
         try:
             async with get_background_session() as session:
                 await RequestLogsRepository(session).add_log(

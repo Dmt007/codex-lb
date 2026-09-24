@@ -89,6 +89,16 @@ TIMESTAMP_PREFIX_PATTERN = re.compile(r"^(\d{8}_\d{6})_")
 # merge revision): zero violations at or after the cutoff.
 RATCHET_PREFIX = "20260911_000000"
 
+# Already merged revision identities cannot be renamed: deployed databases may
+# have either stamp. The corrective merge restores the lineage; accept only
+# this exact historical pair with its original parent and corrective merge.
+# A third revision in this slot, or any new collision, remains an error.
+_HISTORICAL_COLLISION_REVISIONS = frozenset(
+    {"20260914_000000_add_scim_tokens", "20260914_000000_drop_subscription_overflow_schema"}
+)
+_HISTORICAL_COLLISION_PARENT = ("20260913_000000_add_oidc_provider_flow",)
+_HISTORICAL_COLLISION_MERGE = "20260922_000000_preferred_responses_source"
+
 _FAILURE_PREFIX = "check_migration_topology"
 
 
@@ -364,6 +374,14 @@ def check_timestamp_prefix_collisions(revisions: Sequence[Revision], ratchet_pre
         if len(group) < 2:
             continue
         if not _ratcheted((prefix,), ratchet_prefix):
+            continue
+        if (
+            len(group) == len(_HISTORICAL_COLLISION_REVISIONS)
+            and {revision.revision for revision in group} == _HISTORICAL_COLLISION_REVISIONS
+            and all(revision.down_revisions == _HISTORICAL_COLLISION_PARENT for revision in group)
+            and len(parents.get(_HISTORICAL_COLLISION_MERGE, ())) == 2
+            and set(parents.get(_HISTORICAL_COLLISION_MERGE, ())) == _HISTORICAL_COLLISION_REVISIONS
+        ):
             continue
         group = sorted(group, key=lambda item: item.revision)
         described = "; ".join(revision.describe() for revision in group)

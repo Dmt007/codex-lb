@@ -1,4 +1,10 @@
 {
+  "modelSources.health.active": "Active",
+  "modelSources.health.inactive": "Inactive",
+  "modelSources.health.unknown": "Not checked",
+  "modelSources.health.description": "Last observed Responses request; not a live connection or balance check.",
+  "accounts.addDialog.sourceTitle": "Company gateway",
+  "accounts.addDialog.sourceDescription": "Connect a gateway using its address and API key.",
   "modelSources.fields.preferForResponses": "Try this source before local accounts",
   "accounts.actions.disableWarmup": "Disable Warmup",
   "accounts.actions.enableWarmup": "Enable Warmup",

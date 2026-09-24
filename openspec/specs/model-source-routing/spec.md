@@ -197,3 +197,47 @@ The backend Codex and public v1 Responses routes, including trailing-slash equiv
 #### Scenario: Trailing slash
 - **WHEN** a client uses a trailing-slash Responses route
 - **THEN** company-first selection and fallback match the canonical route
+
+### Requirement: Source management alongside accounts
+
+The Accounts page SHALL expose source creation, editing, enablement and Responses preference controls beside the account list for authorized source administrators. It SHALL operate on the same source records as Settings. Account administration permission alone SHALL NOT grant source administration access. The controls SHALL remain usable in the narrow account column and on mobile.
+
+#### Scenario: Operator manages company gateway from Accounts
+- **WHEN** a source administrator opens Accounts
+- **THEN** source controls appear in the account list column and allow adding or editing a gateway and changing its enablement and preference
+
+#### Scenario: Existing source is shared
+- **WHEN** a source previously created in Settings is viewed in Accounts
+- **THEN** the same source and settings are shown without importing a duplicate
+
+#### Scenario: Restricted account administrator
+- **WHEN** an account administrator lacks source write permission
+- **THEN** the Accounts page does not expose the source administration section
+
+### Requirement: Gateway cards share the account list and add chooser
+
+For source administrators, gateway cards SHALL appear inside the same scrolling list as subscription account cards, not in a separate panel below the list. Add account SHALL offer a company gateway option opening the existing source creation form. Source editing, enablement and preference SHALL remain available on the gateway cards. Settings SHALL continue using the same stored sources. Restricted operators SHALL NOT receive source administration controls.
+
+#### Scenario: Gateway in account card list
+- **WHEN** a source administrator opens Accounts with a saved gateway
+- **THEN** its card is inside the account list scroll region with its existing source controls
+
+#### Scenario: Add company gateway
+- **WHEN** the administrator chooses Company gateway in Add account
+- **THEN** the chooser closes and the source creation dialog opens
+
+### Requirement: Gateway availability reflects completed Responses attempts
+
+Source cards SHALL show Active after successful Responses completion, Inactive after upstream authentication, quota, server or connection failure, and Not checked before an observation. This status SHALL be independent of administrative enablement and SHALL NOT exclude a source from retries. Client cancellation, invalid client payloads and local accounting errors SHALL NOT mark a source inactive. Health writes SHALL follow reservation cleanup and SHALL NOT run if cleanup failed. Updating URL or credentials SHALL reset health to unknown; outcomes from the old configuration SHALL NOT update the new configuration. The dashboard SHALL refresh observations within 15 seconds while visible. The status SHALL describe the last observed request rather than a live balance or periodic probe.
+
+#### Scenario: Recovery
+- **WHEN** a source fails authentication and later completes a Responses request successfully
+- **THEN** its status changes from Inactive to Active
+
+#### Scenario: Cancellation
+- **WHEN** a client cancels its request
+- **THEN** the source retains its previous health status
+
+#### Scenario: Credentials changed during request
+- **WHEN** a source's credentials change while an old request finishes
+- **THEN** the old request does not overwrite the reset health status

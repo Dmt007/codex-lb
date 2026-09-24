@@ -23,18 +23,26 @@ fallback. The existing WebSocket source guard remains in use.
   upgrade, downgrade and re-upgrade without losing the historical row.
 - Ruff and strict OpenSpec change validation pass. Main specs have been synced.
 
-## Outstanding repository gate
+## Resolved repository gate
 
-The checkout already contained two migration heads with the same timestamp:
+The checkout originally contained two migration heads with the same timestamp:
 `20260914_000000_add_scim_tokens` and
 `20260914_000000_drop_subscription_overflow_schema`. The new revision merges
-them and restores one head. The topology checker still rejects their existing
-timestamp collision. Historical migration files were not rewritten and the
-checker was not weakened. `make` is unavailable in this Windows environment;
-its migration topology script was run directly.
+them and restores one head. The topology checker now recognizes only this exact
+historical pair, with its original parent and exact corrective merge. Third
+revisions, changed parents, missing merges and changed merges remain errors.
+Historical migration files were not rewritten. `make` is unavailable in this
+Windows environment; every command from its lint and architecture-check targets
+was run directly and passed. Two pre-existing formatting issues in
+`test_windows_desktop_controller.py` were fixed without behavioral changes.
 
-Task 1.1 remains open for the repository topology gate. The change is not
-archived or declared release-ready while that gate fails.
+Additional verification: 30 migration/topology tests passed. A fresh isolated
+SQLite database upgraded through the full migration chain to
+`20260922_000000_preferred_responses_source`; `codex-lb-db check` returned
+`migration_policy=ok` and `schema_drift=none`. Pytest's default Windows temporary
+directory was inaccessible; tests passed with a fresh explicit temporary path.
+No application database was used. Local verification is complete; no GitHub
+merge/CI readiness claim is made.
 
 ## Operational limits
 

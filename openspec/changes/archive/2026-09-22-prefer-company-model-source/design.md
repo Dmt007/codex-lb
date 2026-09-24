@@ -28,3 +28,9 @@ Reuse the existing WebSocket source ownership guard to move eligible source requ
 ## Migration Plan
 
 Add a false-default boolean on the current Alembic head, covering existing rows. Rollback removes the preference after reverting application code. Configure credentials through the existing protected source dashboard, never in migration data.
+
+The checkout contained an already merged timestamp collision between the SCIM
+and overflow-removal migrations. Preserve both IDs and accept their timestamp
+only as the exact known pair with their original parent and corrective merge.
+This is a narrowly scoped historical compatibility exception, not an exemption
+for other merged collisions or future reuse of this timestamp.

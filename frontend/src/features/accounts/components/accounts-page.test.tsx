@@ -9,6 +9,12 @@ import { useAccountQuotaDisplayStore } from "@/hooks/use-account-quota-display";
 import { ADMIN_PERMISSIONS, createUpstreamProxyAdmin } from "@/test/mocks/factories";
 import type { AccountSummary } from "@/features/accounts/schemas";
 
+vi.mock("@/features/model-sources/components/model-sources-settings", () => ({
+  ModelSourcesSettings: ({ renderAccountList }: { renderAccountList: (cards: React.ReactNode, open: () => void) => React.ReactNode }) => renderAccountList(
+    <div data-testid="account-model-sources" />, () => {},
+  ),
+}));
+
 vi.mock("@/features/accounts/hooks/use-accounts", () => ({
   useAccounts: vi.fn(),
   useAccountTrends: vi.fn(() => ({ data: null })),
@@ -109,6 +115,20 @@ function account(overrides: Partial<AccountSummary>): AccountSummary {
 }
 
 describe("AccountsPage", () => {
+  it("places compact source management beside the accounts", () => {
+    useAuthStore.setState({ canWrite: true, permissions: ADMIN_PERMISSIONS });
+    mockAccountsQuery([account({})]);
+    render(<MemoryRouter><AccountsPage /></MemoryRouter>);
+    expect(within(screen.getByTestId("account-list-scroll-region")).getByTestId("account-model-sources"))
+      .toBeInTheDocument();
+  });
+
+  it("does not grant source management from account permission alone", () => {
+    useAuthStore.setState({ canWrite: false, permissions: ["accounts:read", "accounts:write"] });
+    mockAccountsQuery([account({})]);
+    render(<MemoryRouter><AccountsPage /></MemoryRouter>);
+    expect(screen.queryByTestId("account-model-sources")).not.toBeInTheDocument();
+  });
   beforeEach(() => {
     // The auth store starts least-privilege; these cases exercise admin actions.
     useAuthStore.setState({

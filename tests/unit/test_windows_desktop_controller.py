@@ -1,6 +1,5 @@
 from pathlib import Path
 
-
 REPOSITORY_ROOT = Path(__file__).parents[2]
 CONTROLLER_ROOT = REPOSITORY_ROOT / "scripts" / "windows" / "codex-lb-control"
 
@@ -27,9 +26,7 @@ def test_windows_controller_refuses_foreign_processes() -> None:
 
 
 def test_windows_controller_documentation_links_spec() -> None:
-    docs = (REPOSITORY_ROOT / "docs" / "deployment" / "windows-desktop-controller.md").read_text(
-        encoding="utf-8"
-    )
+    docs = (REPOSITORY_ROOT / "docs" / "deployment" / "windows-desktop-controller.md").read_text(encoding="utf-8")
     assert "openspec/specs/deployment-installation" in docs
     assert "install.ps1" in docs
     assert "stop.ps1" in docs

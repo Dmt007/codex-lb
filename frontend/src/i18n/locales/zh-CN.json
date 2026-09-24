@@ -1,4 +1,10 @@
 {
+  "modelSources.health.active": "??",
+  "modelSources.health.inactive": "???",
+  "modelSources.health.unknown": "???",
+  "modelSources.health.description": "???? Responses ?????????????????",
+  "accounts.addDialog.sourceTitle": "公司网关",
+  "accounts.addDialog.sourceDescription": "使用地址和 API 密钥连接网关。",
   "modelSources.fields.preferForResponses": "优先使用此来源，再使用本地账号",
   "accounts.actions.disableWarmup": "禁用 Warm-up",
   "accounts.actions.enableWarmup": "启用 Warm-up",

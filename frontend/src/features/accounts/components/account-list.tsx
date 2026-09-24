@@ -1,5 +1,5 @@
 import { ChevronDown, ChevronUp, Plus, Search } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -37,6 +37,8 @@ export type AccountListProps = {
   onSortModeChange?: (sortMode: AccountSortMode) => void;
   showResetCreditBadges?: boolean;
   readOnly?: boolean;
+  sourceCards?: ReactNode;
+  onOpenSource?: () => void;
 };
 
 export function AccountList({
@@ -49,6 +51,8 @@ export function AccountList({
   onSortModeChange,
   showResetCreditBadges = true,
   readOnly = false,
+  sourceCards,
+  onOpenSource,
 }: AccountListProps) {
   const { t } = useTranslation();
   const [search, setSearch] = useState("");
@@ -157,6 +161,7 @@ export function AccountList({
         className="flex-1 min-h-0 space-y-1 overflow-y-auto p-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         data-testid="account-list-scroll-region"
       >
+        {sourceCards}
         {filtered.length === 0 ? (
           <div className="flex flex-col items-center gap-2 rounded-lg border border-dashed p-6 text-center">
             <p className="text-sm font-medium text-muted-foreground">
@@ -191,6 +196,7 @@ export function AccountList({
         onOpenChange={setChooserOpen}
         onImport={onOpenImport}
         onAddAccount={onOpenOauth}
+        onAddSource={onOpenSource}
       />
     </div>
   );

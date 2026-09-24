@@ -1,4 +1,4 @@
-import { Suspense, lazy, useCallback, useMemo, useState } from "react";
+import { Suspense, lazy, useCallback, useMemo, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
 
@@ -26,8 +26,9 @@ import { useOauth } from "@/features/accounts/hooks/use-oauth";
 import { useSettings, useUpstreamProxyAdmin } from "@/features/settings/hooks/use-settings";
 import { useAccountQuotaDisplayStore } from "@/hooks/use-account-quota-display";
 import type { AccountAuthExportResponse } from "@/features/accounts/schemas";
-import { usePermission } from "@/features/auth/hooks/use-auth";
+import { useAuthStore, usePermission } from "@/features/auth/hooks/use-auth";
 import { getErrorMessageOrNull } from "@/utils/errors";
+import { ModelSourcesSettings } from "@/features/model-sources/components/model-sources-settings";
 
 const OauthDialog = lazy(() =>
   import("@/features/accounts/components/oauth-dialog").then((m) => ({
@@ -56,6 +57,7 @@ export function AccountsPage() {
   } = useAccounts();
   const { settingsQuery } = useSettings();
   const canWrite = usePermission("accounts:write");
+  const canManageSources = useAuthStore((state) => state.canWrite);
   // Upstream-proxy administration is an `ops:write` read on the backend; cached
   // data from an earlier admin session must not be rendered either.
   const canReadUpstreamProxy = usePermission("ops:write");
@@ -151,6 +153,25 @@ export function AccountsPage() {
     getErrorMessageOrNull(accountBindingMutation.error) ||
     getErrorMessageOrNull(testEndpointMutation.error);
 
+  const renderAccountList = (cards?: ReactNode, openCreate?: () => void) => (
+<AccountList
+                accounts={accounts}
+                selectedAccountId={resolvedSelectedAccountId}
+                onSelect={handleSelectAccount}
+                sortMode={accountSortMode}
+                onSortModeChange={setAccountSortMode}
+                showResetCreditBadges={showResetCreditBadges}
+                onOpenImport={() => importDialog.show()}
+                onOpenOauth={() => {
+                  setOauthAccountId(null);
+                  oauthDialog.show();
+                }}
+                sourceCards={cards}
+                onOpenSource={openCreate}
+                readOnly={!canWrite}
+              />
+  );
+
   return (
     <div className="animate-fade-in-up space-y-6">
       {/* Page header */}
@@ -174,26 +195,15 @@ export function AccountsPage() {
         >
           <div
             data-testid="accounts-list-panel"
-            className="min-w-0 min-h-0 self-start"
+            className="min-w-0 min-h-0 self-start space-y-4"
           >
             <div
               data-testid="accounts-list-card"
               className="flex min-h-0 min-w-0 flex-col rounded-xl border bg-card p-3 sm:p-4"
             >
-              <AccountList
-                accounts={accounts}
-                selectedAccountId={resolvedSelectedAccountId}
-                onSelect={handleSelectAccount}
-                sortMode={accountSortMode}
-                onSortModeChange={setAccountSortMode}
-                showResetCreditBadges={showResetCreditBadges}
-                onOpenImport={() => importDialog.show()}
-                onOpenOauth={() => {
-                  setOauthAccountId(null);
-                  oauthDialog.show();
-                }}
-                readOnly={!canWrite}
-              />
+              {canManageSources ? (
+                <ModelSourcesSettings renderAccountList={renderAccountList} />
+              ) : renderAccountList()}
             </div>
           </div>
 

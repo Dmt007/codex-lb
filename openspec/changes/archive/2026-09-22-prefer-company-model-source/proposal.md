@@ -19,6 +19,7 @@ None.
 ### Modified Capabilities
 
 - `model-source-routing`: opt-in company-first Responses selection and safe subscription fallback with dashboard controls.
+- `database-migrations`: preserve the already merged September 14 revision IDs with an exact, merge-gated historical timestamp exception; continue rejecting new collisions.
 
 ## Impact
 

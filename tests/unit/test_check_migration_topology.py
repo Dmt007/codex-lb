@@ -164,6 +164,32 @@ def test_prefix_collision_before_the_ratchet_is_grandfathered(checker: ModuleTyp
     assert not any(message.startswith("alembic_timestamp_prefix_collision") for message in _errors(reports))
 
 
+@pytest.mark.parametrize("mutation", [None, "missing_merge", "wrong_merge", "third_revision", "changed_parent"])
+def test_historical_collision_requires_exact_corrective_merge(
+    checker: ModuleType, tmp_path: Path, mutation: str | None
+):
+    versions = tmp_path / "versions"
+    parent = "20260913_000000_add_oidc_provider_flow"
+    left = "20260914_000000_add_scim_tokens"
+    right = "20260914_000000_drop_subscription_overflow_schema"
+    merge = "20260922_000000_preferred_responses_source"
+    base = _linear_fixture(checker, versions)
+    _write_revision(versions, parent, base)
+    _write_revision(versions, left, base if mutation == "changed_parent" else parent)
+    _write_revision(versions, right, parent)
+    if mutation != "missing_merge":
+        _write_revision(versions, merge, (left, parent) if mutation == "wrong_merge" else (left, right))
+    if mutation == "third_revision":
+        third = "20260914_000000_new_collision"
+        _write_revision(versions, third, parent)
+        _write_revision(versions, "20260923_000000_another_merge", (merge, third))
+    reports, _ = checker.run_all(versions_dir=versions, base_ref="")
+    collisions = [message for message in _errors(reports) if message.startswith("alembic_timestamp_prefix_collision")]
+    assert bool(collisions) is (mutation is not None)
+    if mutation is None:
+        assert not _errors(reports)
+
+
 def test_revision_id_must_match_its_filename(checker: ModuleType, tmp_path: Path) -> None:
     versions = tmp_path / "versions"
     head = _linear_fixture(checker, versions)

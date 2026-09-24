@@ -20,6 +20,7 @@ export function useModelSources() {
   const { data, error, isFetching, isLoading, isPending, isSuccess, refetch } = useQuery({
     queryKey: ["model-sources", "list"],
     queryFn: listModelSources,
+    refetchInterval: 15_000,
   });
   const modelSourcesQuery = { data, error, isFetching, isLoading, isPending, isSuccess, refetch };
 

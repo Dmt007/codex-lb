@@ -7,10 +7,29 @@ from sqlalchemy import select
 
 from app.db.models import ApiKeyUsageReservation
 from app.db.session import SessionLocal
+from app.modules.model_sources.repository import ModelSourcesRepository
 from app.modules.proxy import api
 from tests.integration.model_source_helpers import _create_model_source, _enable_api_key_auth, stub_source_upstreams
 
 pytestmark = [pytest.mark.integration, pytest.mark.asyncio]
+
+
+async def test_health_ignores_old_source_configuration(async_client):
+    source_id = await _create_model_source(
+        async_client,
+        name="health-fence",
+        model="gpt-5.6-sol",
+        base_url="http://localhost:1/v1",
+        supports_responses=True,
+    )
+    async with SessionLocal() as session:
+        source = await ModelSourcesRepository(session).get_by_id(source_id)
+        session.expunge_all()
+    await async_client.patch(f"/api/model-sources/{source_id}", json={"apiKey": "changed"})
+    async with SessionLocal() as session:
+        await ModelSourcesRepository(session).record_health(source, "inactive")
+    sources = (await async_client.get("/api/model-sources/")).json()["sources"]
+    assert sources[0]["healthStatus"] == "unknown"
 
 
 @pytest.mark.parametrize(
@@ -37,6 +56,8 @@ async def test_company_rejection_fallback(async_client, monkeypatch, path, statu
         assert "apiKey" not in patched.json()
         response = await async_client.post(path, json={"model": "gpt-5.6-sol", "input": "hello", "stream": stream})
         assert calls == ["/v1/responses"]
+        sources = (await async_client.get("/api/model-sources/")).json()["sources"]
+        assert sources[0]["healthStatus"] == ("unknown" if status == 400 else "inactive")
         if status == 400:
             assert response.status_code == 400
             local.assert_not_awaited()
@@ -98,6 +119,10 @@ async def test_company_no_replay(async_client, monkeypatch, failure):
         if failure == "success":
             assert response.status_code == 200
             assert response.json()["id"] == "resp_company"
+            sources = (await async_client.get("/api/model-sources/")).json()["sources"]
+            assert sources[0]["healthStatus"] == "active"
+            reset = await async_client.patch(f"/api/model-sources/{source_id}", json={"apiKey": "replacement"})
+            assert reset.json()["healthStatus"] == "unknown"
         else:
             assert response.status_code >= 400
 

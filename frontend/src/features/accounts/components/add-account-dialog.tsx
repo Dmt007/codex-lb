@@ -15,9 +15,10 @@ export type AddAccountDialogProps = {
   onOpenChange: (open: boolean) => void;
   onImport: () => void;
   onAddAccount: () => void;
+  onAddSource?: () => void;
 };
 
-export function AddAccountDialog({ open, onOpenChange, onImport, onAddAccount }: AddAccountDialogProps) {
+export function AddAccountDialog({ open, onOpenChange, onImport, onAddAccount, onAddSource }: AddAccountDialogProps) {
   const { t } = useTranslation();
   // Close the chooser first, then defer the action to the next frame. Opening a
   // second modal Dialog in the same tick the chooser closes can leave Radix's
@@ -36,6 +37,21 @@ export function AddAccountDialog({ open, onOpenChange, onImport, onAddAccount }:
         </DialogHeader>
 
         <div className="space-y-2">
+          {onAddSource ? (
+            <button
+              type="button"
+              onClick={() => handleSelect(onAddSource)}
+              className="flex w-full cursor-pointer items-start gap-3 rounded-lg border p-3 text-left outline-none transition-colors hover:bg-muted/50 focus-visible:ring-[3px] focus-visible:ring-ring/50"
+            >
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border bg-muted/50">
+                <Plus className="h-4 w-4 text-muted-foreground" />
+              </span>
+              <span className="min-w-0">
+                <span className="block text-sm font-medium">{t("accounts.addDialog.sourceTitle")}</span>
+                <span className="mt-0.5 block text-xs text-muted-foreground">{t("accounts.addDialog.sourceDescription")}</span>
+              </span>
+            </button>
+          ) : null}
           <button
             type="button"
             onClick={() => handleSelect(onAddAccount)}

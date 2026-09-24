@@ -1,4 +1,10 @@
 {
+  "modelSources.health.active": "??",
+  "modelSources.health.inactive": "???",
+  "modelSources.health.unknown": "???? ??",
+  "modelSources.health.description": "??? Responses ?? ?????. ??? ???? ?? ??? ????.",
+  "accounts.addDialog.sourceTitle": "회사 게이트웨이",
+  "accounts.addDialog.sourceDescription": "주소와 API 키로 게이트웨이를 연결합니다.",
   "modelSources.fields.preferForResponses": "로컬 계정보다 이 소스를 먼저 사용",
   "accounts.actions.disableWarmup": "Warm-up 끄기",
   "accounts.actions.enableWarmup": "Warm-up 켜기",
